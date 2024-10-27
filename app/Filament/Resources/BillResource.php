@@ -15,6 +15,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -97,14 +99,45 @@ class BillResource extends Resource
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->currency),
                 TextColumn::make('status')
                     ->label('Status')
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        return match ($state) {
+                            'draft' => '<span style="background-color: rgba(128, 128, 128, 0.3); color: gray; border: 1px solid gray; padding: 4px 8px; border-radius: 4px;">' . ucfirst($state) . '</span>',
+                            'sent' => '<span style="background-color: rgb(253, 218, 13, 0.3); color: rgb(253, 218, 13); border: 1px solid rgb(253, 218, 13); padding: 4px 8px; border-radius: 4px;">' . ucfirst($state) . '</span>',
+                            'paid' => '<span style="background-color: rgb(34, 139, 34, 0.3); color: rgb(34, 139, 34); border: 1px solid rgb(34, 139, 34); padding: 4px 8px; border-radius: 4px;">' . ucfirst($state) . '</span>',
+                            default => '<span style="background-color: rgba(255, 0, 0, 0.3); color: red; border: 1px solid red; padding: 4px 8px; border-radius: 4px;">Unknown</span>',
+                        };
+                    })
+                    ->html(),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'paid' => 'Paid',
+                    ]),
+                Filter::make('amount')
+                    ->label('Price Range')
+                    ->min(0)
+                    ->max(10000)
+                    ->step(100)
+                    ->default([0, 10000])
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $set('filters.amount', $state);
+                    }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-eye')
+                    ->color('white'),
+                Tables\Actions\EditAction::make()
+                    ->label('')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('primary'),
                 ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
