@@ -11,6 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -21,6 +22,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Date;
+use Rupadana\FilamentSlider\Components\InputSlider;
+use Rupadana\FilamentSlider\Components\InputSliderGroup;
 
 class BillResource extends Resource
 {
@@ -119,15 +122,25 @@ class BillResource extends Resource
                         'paid' => 'Paid',
                     ]),
                 Filter::make('amount')
-                    ->label('Price Range')
-                    ->min(0)
-                    ->max(10000)
-                    ->step(100)
-                    ->default([0, 10000])
-                    ->reactive()
-                    ->afterStateUpdated(function (callable $set, $state) {
-                        $set('filters.amount', $state);
-                    }),
+                    ->form([
+                        InputSliderGroup::make('amount')
+                            ->label('Amount Range')
+                            ->sliders([
+                                InputSlider::make('min')
+                                    ->label('Min Amount'),
+                                InputSlider::make('max')
+                                    ->label('Max Amount')
+                            ])
+                            ->range([
+                                "min" => (new Bill())->getMinAmount(),
+                                "max" => (new Bill())->getMaxAmount(),
+                            ])
+                            ->enableTooltips()
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                $set('filters.amount', $state);
+                            }),
+                    ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()

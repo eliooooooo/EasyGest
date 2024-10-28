@@ -22,4 +22,12 @@ class Bill extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function getMinAmount() {
+        return 0;
+    }
+
+    public function getMaxAmount() {
+        return 3000;
+    }
 }
