@@ -37,16 +37,20 @@ class BillResource extends Resource
             ->schema([
                 Select::make('client_id')
                     ->label('Client')
+                    ->searchable(true)
                     ->relationship('client', 'name')
                     ->required(),
                 TextInput::make('number')
+                    ->placeholder('0001')
                     ->label('Bill number')
                     ->required(),
                 DatePicker::make('date')
                     ->label('Date')
+                    ->placeholder('2024-10-01')
                     ->required(),
                 DatePicker::make('due_date')
                     ->label('Due date')
+                    ->placeholder('2024-11-01')
                     ->required(),
                 Select::make('currency')
                     ->label('Currency')
@@ -58,6 +62,7 @@ class BillResource extends Resource
                     ->required(),
                 TextInput::make('amount')
                     ->label('Amount')
+                    ->placeholder('1000')
                     ->integer()
                     ->required(),
                 Select::make('status')
@@ -70,10 +75,12 @@ class BillResource extends Resource
                     ->required(),
                 TextArea::make('notes')
                     ->label('Notes')
+                    ->placeholder('Write some notes here...')
                     ->nullable()
                     ->rows(1),
                 Textarea::make('items')
                     ->label('Items')
+                    ->placeholder('Write some items here...')
                     ->nullable()
                     ->columnSpan(2)
                     ->rows(5)
